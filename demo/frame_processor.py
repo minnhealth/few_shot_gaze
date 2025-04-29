@@ -235,6 +235,7 @@ class frame_processer:
                     cv2.putText(display, '.', (int(x_pixel_hat), int(y_pixel_hat)), font, 0.5, (0, 0, 255), 10, cv2.LINE_AA)
                     cv2.namedWindow("por", cv2.WINDOW_NORMAL)
                     cv2.setWindowProperty("por", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+                    #cv2.moveWindow("por", 3840, 0) # Uncomment to run on a second/third monitor
                     cv2.imshow('por', display)
 
                     # also show the face:

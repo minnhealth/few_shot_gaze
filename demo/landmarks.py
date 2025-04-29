@@ -152,8 +152,8 @@ class landmarks:
         # if N >= 68:
         #     last_point = 68
         for i in range(0, N):
-            x = markers[i, 0]
-            y = markers[i, 1]
+            x = int(markers[i, 0])
+            y = int(markers[i, 1])
             # cv2.circle(img, (x, y), radius, color)
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(img, str(i), (x, y), font, 0.3, (255, 0, 0), 1, cv2.LINE_AA)

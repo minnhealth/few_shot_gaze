@@ -6,7 +6,7 @@
 	url = https://github.com/patrikhuber/eos
 [submodule "demo/ext/HRNet-Facial-Landmark-Detection"]
 	path = demo/ext/HRNet-Facial-Landmark-Detection
-	url = https://github.com/HRNet/HRNet-Facial-Landmark-Detection
+	url = https://github.com/minnhealth/HRNet-Facial-Landmark-Detection
 [submodule "demo/ext/mtcnn-pytorch"]
 	path = demo/ext/mtcnn-pytorch
 	url = https://github.com/TropComplique/mtcnn-pytorch

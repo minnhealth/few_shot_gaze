@@ -83,6 +83,7 @@ def collect_data(cap, mon, calib_points=9, rand_points=5):
 
     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty("image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    # cv2.moveWindow("image", 3840, 0) #Uncomment to run on a second/third monitor
 
     calib_data = {'frames': [], 'g_t': []}
 
