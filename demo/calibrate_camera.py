@@ -18,7 +18,7 @@ from camera import cam_calibrate
 # Start camera
 #################################
 
-cam_idx = 0
+cam_idx = 2
 
 # adjust these for your camera to get the best accuracy
 # use the same parameters to run the actual demoqsqq

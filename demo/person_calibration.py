@@ -18,13 +18,25 @@ sys.path.append("../src")
 from losses import GazeAngularLoss
 
 directions = ['l', 'r', 'u', 'd']
-keys = {'u': 82,
-        'd': 84,
-        'l': 81,
-        'r': 83}
+keys = {
+    'u': (82, 2490368),  # Linux, Windows
+    'd': (84, 2621440),
+    'l': (81, 2424832),
+    'r': (83, 2555904)
+}
 
 global THREAD_RUNNING
 global frames
+
+def get_arrow_key():
+    key = cv2.waitKeyEx(0)
+    if key in (0, 224):  # Windows uses 0 or 224 as extended prefix
+        key = cv2.waitKey(0)
+        if key in (72, 80, 75, 77):
+            return key
+    elif key in (81, 82, 83, 84):  # X11 codes on Linux
+        return key
+    return key
 
 def create_image(mon, direction, i, color, target='E', grid=True, total=9):
 
@@ -98,17 +110,20 @@ def collect_data(cap, mon, calib_points=9, rand_points=5):
         direction = random.choice(directions)
         img, g_t = create_image(mon, direction, i, (0, 0, 0), grid=True, total=calib_points)
         cv2.imshow('image', img)
-        key_press = cv2.waitKey(0)
-        if key_press == keys[direction]:
+        key_press = cv2.waitKeyEx(0)
+        if key_press in keys[direction]:
             THREAD_RUNNING = False
             th.join()
             calib_data['frames'].append(frames)
             calib_data['g_t'].append(g_t)
+            print(f"Calib point {i} completed, showing next...")
             i += 1
         elif key_press & 0xFF == ord('q'):
+            print("'q' pressed, stopping...")
             cv2.destroyAllWindows()
             break
         else:
+            print(f"Key press was {key_press}, expected keys[{direction}] {keys[direction]}")
             THREAD_RUNNING = False
             th.join()
 
@@ -123,12 +138,13 @@ def collect_data(cap, mon, calib_points=9, rand_points=5):
         direction = random.choice(directions)
         img, g_t = create_image(mon, direction, i, (0, 0, 0), grid=False, total=rand_points)
         cv2.imshow('image', img)
-        key_press = cv2.waitKey(0)
-        if key_press == keys[direction]:
+        key_press = cv2.waitKeyEx(0)
+        if key_press in keys[direction]:
             THREAD_RUNNING = False
             th.join()
             calib_data['frames'].append(frames)
             calib_data['g_t'].append(g_t)
+            print(f"Rand calib point {i} completed, showing next...")
             i += 1
         elif key_press & 0xFF == ord('q'):
             cv2.destroyAllWindows()
