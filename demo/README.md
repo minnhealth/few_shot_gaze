@@ -1,3 +1,43 @@
+## Usage
+
+First install the requirements.txt found in this folder using pip.
+
+**Note:** This was done using Python 3.9
+
+### Live Mode (Webcam)
+
+`python run_demo.py --camera 0` 
+
+-   `--camera, -c` — camera index (default 2)
+    
+-   No video is written to disk; results appear in an on-screen window.
+    
+-   First run will prompt you to calibrate camera & monitor, then subject calibration.
+    
+-   To force re-calibration (even if files exist): add `--force-calibrate` (or `-f`).
+    
+
+### Post-Process Mode (Video File)
+
+`python run_demo.py --video input.mp4 --output gaze_output.mp4 --fps 60` 
+
+-   `--video, -v` — path to input video file
+    
+-   `--output, -o` — overlay video path (default `gaze_output.mp4`)
+    
+-   `--fps` — frame rate for output video (default 60)
+    
+-   Progress logs (time / frame / percent) are printed to the console.
+    
+-   Uses the same calibration data; no on-screen windows are opened.
+
+---
+
+# Legacy: Original FAZE Fork Instructions
+
+> **🚧 This section is here for historical/reference purposes only.**  
+> These steps describe the *unmodified* demo from the original FAZE repo and may no longer apply to the code in this branch.
+
 ## Realtime Demo Instructions
 
 ### 1. Setup
