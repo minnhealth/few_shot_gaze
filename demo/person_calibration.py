@@ -12,9 +12,12 @@ import random
 import threading
 import pickle
 import sys
-
+import os
 import torch
-sys.path.append("../src")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_PATH = os.path.join(BASE_DIR, "..", "src")
+sys.path.append(os.path.normpath(SRC_PATH))
 from losses import GazeAngularLoss
 
 directions = ['l', 'r', 'u', 'd']
@@ -65,16 +68,16 @@ def create_image(mon, direction, i, color, target='E', grid=True, total=9):
     img = np.ones((h, w, 3), np.float32)
     if direction == 'r' or direction == 'l':
         if direction == 'r':
-            cv2.putText(img, target, (x, y), font, 0.5, color, 2, cv2.LINE_AA)
+            cv2.putText(img, target, (x, y), font, 1.5, color, 5, cv2.LINE_AA)
         elif direction == 'l':
-            cv2.putText(img, target, (w - x, y), font, 0.5, color, 2, cv2.LINE_AA)
+            cv2.putText(img, target, (w - x, y), font, 1.5, color, 5, cv2.LINE_AA)
             img = cv2.flip(img, 1)
     elif direction == 'u' or direction == 'd':
         imgT = np.ones((w, h, 3), np.float32)
         if direction == 'd':
-            cv2.putText(imgT, target, (y, x), font, 0.5, color, 2, cv2.LINE_AA)
+            cv2.putText(imgT, target, (y, x), font, 1.5, color, 5, cv2.LINE_AA)
         elif direction == 'u':
-            cv2.putText(imgT, target, (h - y, x), font, 0.5, color, 2, cv2.LINE_AA)
+            cv2.putText(imgT, target, (h - y, x), font, 1.5, color, 5, cv2.LINE_AA)
             imgT = cv2.flip(imgT, 1)
         img = imgT.transpose((1, 0, 2))
 
@@ -269,3 +272,9 @@ def fine_tune(subject, data, frame_processor, mon, device, gaze_network, k, step
     torch.cuda.empty_cache()
 
     return gaze_network
+
+def fine_tune_from_pkl(participant_id, pkl_path, frame_processor, mon, device, gaze_network, k, steps=1000, lr=1e-4, show=False):
+    with open(pkl_path, 'rb') as f:
+        calib_data = pickle.load(f)
+
+    return fine_tune(participant_id, calib_data, frame_processor, mon, device, gaze_network, k, steps, lr, show)
