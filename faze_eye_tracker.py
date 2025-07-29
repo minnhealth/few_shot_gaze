@@ -16,7 +16,7 @@ class FazeEyeTracker(EyeTracker):
         self.gaze_callback = None
 
     def start(self, participant_id, screen_width, screen_height):
-        print("[FAZE] Starting FAZE")
+        pass
 
     def stop(self):
         self.running.clear()
@@ -28,7 +28,7 @@ class FazeEyeTracker(EyeTracker):
         self.thread = None
 
     def calibrate(self, calibration_finished_callback):
-        print("[FAZE] calibrate")
+        print("[FAZE] Calibrating...")
         cap = cv2.VideoCapture(self.camera_index)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -45,4 +45,4 @@ class FazeEyeTracker(EyeTracker):
             calibration_finished_callback(True, "FAZE calibration finished.")
 
     def set_gaze_estimate_callback(self, gaze_callback):
-        print("[FAZE] set_gaze_estimate_callback")
+        pass

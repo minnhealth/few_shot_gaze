@@ -89,7 +89,7 @@ writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 writer.writeheader()
 
 # Run main loop
-video_input_path = os.path.join(args.data_dir, "video", "session_recording.mp4")
+video_input_path = os.path.join(args.data_dir, "video", "video_input.mp4")
 cap = cv2.VideoCapture(video_input_path)
 total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 print(f"[INFO] Total frames: {int(total_frames)}")
