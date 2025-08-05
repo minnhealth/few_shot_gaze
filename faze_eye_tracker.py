@@ -11,7 +11,6 @@ class FazeEyeTracker(EyeTracker):
         self.camera_index = camera_index
         self.cap = None
         self.running = Event()
-        self.thread = None
         self._calibrated = False
         self.gaze_callback = None
 
@@ -20,21 +19,22 @@ class FazeEyeTracker(EyeTracker):
 
     def stop(self):
         self.running.clear()
-        if self.thread is not None:
-            self.thread.join()
         if self.cap is not None:
             self.cap.release()
         self.cap = None
-        self.thread = None
 
     def calibrate(self, calibration_finished_callback):
         print("[FAZE] Calibrating...")
-        cap = cv2.VideoCapture(self.camera_index)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.cap = cv2.VideoCapture(self.camera_index)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         mon = monitor_windows()
-        calib_data = collect_data(cap, mon, calib_points=9, rand_points=4)
+        calib_data = collect_data(self.cap, mon, calib_points=9, rand_points=4)
+
+        if self.cap is not None:
+            self.cap.release()
+        self.cap = None
 
         with open("./FAZE/calib_data.pkl", "wb") as f:
             pickle.dump(calib_data, f)
