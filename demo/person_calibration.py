@@ -12,34 +12,19 @@ import random
 import threading
 import pickle
 import sys
-
+import os
 import torch
-sys.path.append("../src")
-from losses import GazeAngularLoss
+import time
 
-directions = ['l', 'r', 'u', 'd']
-keys = {
-    'u': (82, 2490368),  # Linux, Windows
-    'd': (84, 2621440),
-    'l': (81, 2424832),
-    'r': (83, 2555904)
-}
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_PATH = os.path.join(BASE_DIR, "..", "src")
+sys.path.append(os.path.normpath(SRC_PATH))
+from losses import GazeAngularLoss
 
 global THREAD_RUNNING
 global frames
 
-def get_arrow_key():
-    key = cv2.waitKeyEx(0)
-    if key in (0, 224):  # Windows uses 0 or 224 as extended prefix
-        key = cv2.waitKey(0)
-        if key in (72, 80, 75, 77):
-            return key
-    elif key in (81, 82, 83, 84):  # X11 codes on Linux
-        return key
-    return key
-
-def create_image(mon, direction, i, color, target='E', grid=True, total=9):
-
+def create_image(mon, i, color, grid=True, total=9):
     h = mon.h_pixels
     w = mon.w_pixels
     if grid:
@@ -61,22 +46,8 @@ def create_image(mon, direction, i, color, target='E', grid=True, total=9):
     x_cam, y_cam, z_cam = mon.monitor_to_camera(x, y)
     g_t = (x_cam, y_cam)
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
     img = np.ones((h, w, 3), np.float32)
-    if direction == 'r' or direction == 'l':
-        if direction == 'r':
-            cv2.putText(img, target, (x, y), font, 0.5, color, 2, cv2.LINE_AA)
-        elif direction == 'l':
-            cv2.putText(img, target, (w - x, y), font, 0.5, color, 2, cv2.LINE_AA)
-            img = cv2.flip(img, 1)
-    elif direction == 'u' or direction == 'd':
-        imgT = np.ones((w, h, 3), np.float32)
-        if direction == 'd':
-            cv2.putText(imgT, target, (y, x), font, 0.5, color, 2, cv2.LINE_AA)
-        elif direction == 'u':
-            cv2.putText(imgT, target, (h - y, x), font, 0.5, color, 2, cv2.LINE_AA)
-            imgT = cv2.flip(imgT, 1)
-        img = imgT.transpose((1, 0, 2))
+    cv2.circle(img, (x, y), radius=30, color=color, thickness=-1)
 
     return img, g_t
 
@@ -89,7 +60,7 @@ def grab_img(cap):
         frames.append(frame)
 
 
-def collect_data(cap, mon, calib_points=9, rand_points=5):
+def collect_data(cap, mon, calib_points=9, rand_points=4):
     global THREAD_RUNNING
     global frames
 
@@ -107,25 +78,18 @@ def collect_data(cap, mon, calib_points=9, rand_points=5):
         THREAD_RUNNING = True
         th = threading.Thread(target=grab_img, args=(cap,))
         th.start()
-        direction = random.choice(directions)
-        img, g_t = create_image(mon, direction, i, (0, 0, 0), grid=True, total=calib_points)
+        img, g_t = create_image(mon, i, (0, 255, 0), grid=True, total=calib_points)
         cv2.imshow('image', img)
-        key_press = cv2.waitKeyEx(0)
-        if key_press in keys[direction]:
-            THREAD_RUNNING = False
-            th.join()
-            calib_data['frames'].append(frames)
-            calib_data['g_t'].append(g_t)
-            print(f"Calib point {i} completed, showing next...")
-            i += 1
-        elif key_press & 0xFF == ord('q'):
-            print("'q' pressed, stopping...")
-            cv2.destroyAllWindows()
-            break
-        else:
-            print(f"Key press was {key_press}, expected keys[{direction}] {keys[direction]}")
-            THREAD_RUNNING = False
-            th.join()
+
+        cv2.waitKey(1)
+        time.sleep(3)
+
+        THREAD_RUNNING = False
+        th.join()
+        calib_data['frames'].append(frames)
+        calib_data['g_t'].append(g_t)
+        print(f"Calib point {i} completed, showing next...")
+        i += 1
 
     i = 0
     while i < rand_points:
@@ -135,23 +99,19 @@ def collect_data(cap, mon, calib_points=9, rand_points=5):
         THREAD_RUNNING = True
         th = threading.Thread(target=grab_img, args=(cap,))
         th.start()
-        direction = random.choice(directions)
-        img, g_t = create_image(mon, direction, i, (0, 0, 0), grid=False, total=rand_points)
+        img, g_t = create_image(mon, i, (0, 255, 0), grid=False, total=rand_points)
         cv2.imshow('image', img)
-        key_press = cv2.waitKeyEx(0)
-        if key_press in keys[direction]:
-            THREAD_RUNNING = False
-            th.join()
-            calib_data['frames'].append(frames)
-            calib_data['g_t'].append(g_t)
-            print(f"Rand calib point {i} completed, showing next...")
-            i += 1
-        elif key_press & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
-        else:
-            THREAD_RUNNING = False
-            th.join()
+
+        cv2.waitKey(1)
+        time.sleep(3)
+
+        THREAD_RUNNING = False
+        th.join()
+        calib_data['frames'].append(frames)
+        calib_data['g_t'].append(g_t)
+        print(f"Calib point {i} completed, showing next...")
+        i += 1
+
     cv2.destroyAllWindows()
 
     return calib_data
@@ -188,7 +148,8 @@ def fine_tune(subject, data, frame_processor, mon, device, gaze_network, k, step
     vid_cap.release()
 
     n = len(data['image_a'])
-    assert n==130, "Face not detected correctly. Collect calibration data again."
+    print(f"DEBUG: n is {n}")
+    assert n==130, "Face not detected correctly. Collect calibration data again."  # Should this be >=130?
     _, c, h, w = data['image_a'][0].shape
     img = np.zeros((n, c, h, w))
     gaze_a = np.zeros((n, 2))
@@ -269,3 +230,9 @@ def fine_tune(subject, data, frame_processor, mon, device, gaze_network, k, step
     torch.cuda.empty_cache()
 
     return gaze_network
+
+def fine_tune_from_pkl(participant_id, pkl_path, frame_processor, mon, device, gaze_network, k, steps=1000, lr=1e-4, show=False):
+    with open(pkl_path, 'rb') as f:
+        calib_data = pickle.load(f)
+
+    return fine_tune(participant_id, calib_data, frame_processor, mon, device, gaze_network, k, steps, lr, show)
