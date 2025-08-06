@@ -38,13 +38,14 @@ def cam_calibrate(cam_idx, cap, cam_calib):
 
                 cv2.imshow('points', frame_copy)
                 # s to save, c to continue, q to quit
-                if cv2.waitKey(0) & 0xFF == ord('s'):
+                key = cv2.waitKey(0) & 0xFF
+                if key == ord('s'):
                     img_points.append(corners)
                     obj_points.append(pts)
                     frames.append(frame)
-                elif cv2.waitKey(0) & 0xFF == ord('c'):
+                elif key == ord('c'):
                     continue
-                elif cv2.waitKey(0) & 0xFF == ord('q'):
+                elif key == ord('q'):
                     print("Calibrating camera...")
                     cv2.destroyAllWindows()
                     break
