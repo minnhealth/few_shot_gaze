@@ -57,7 +57,9 @@ def grab_img(cap):
     global frames
     while THREAD_RUNNING:
         _, frame = cap.read()
-        frames.append(frame)
+        height, width = frame.shape[:2]
+        left_half = frame[:, :width // 2]
+        frames.append(left_half)
 
 
 def collect_data(cap, mon, calib_points=9, rand_points=4):
