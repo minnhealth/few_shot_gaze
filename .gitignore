@@ -1,3 +1,6 @@
 __pycache__/
 src/output*
 venv
+demo/*.pkl
+demo/*.avi
+calib_data.pkl
