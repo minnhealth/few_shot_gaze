@@ -13,12 +13,8 @@ from monitor import monitor_windows
 
 parser = argparse.ArgumentParser(description="FAZE: post-process")
 parser.add_argument(
-    "--id",
-    help="The ID of the participant."
-)
-parser.add_argument(
     "--data-dir",
-    help="The path of the participant's session data directory."
+    help="The path of the participant's session data directory, assuming id_timestamp/ naming."
 )
 parser.add_argument(
     "--camera", "-c",
@@ -46,6 +42,10 @@ gaze_network = DTED(
 
 # Frame processor and monitor setup
 cam_idx = args.camera
+
+# remove timestamp from folder name, allowing multiple _ chars before the timestamp
+id = os.path.basename(args.data_dir).rsplit('_', 1)[0]
+print(f"id={id}")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 calib_path = f"calib_cam{cam_idx}.pkl"
@@ -80,7 +80,7 @@ gaze_network.load_state_dict(ted_weights)
 # Run fine-tuning
 calib_data_path = os.path.join(args.data_dir, "FAZE", "calib_data.pkl")
 gaze_network = fine_tune_from_pkl(
-    args.id, calib_data_path, frame_processor, mon, device,
+    id, calib_data_path, frame_processor, mon, device,
     gaze_network, k=9, steps=1000, lr=1e-5, show=False
 )
 
@@ -107,7 +107,7 @@ last_log = 0.0
 ret, frame = cap.read()
 
 while ret:
-    data = frame_processor.process_one(args.id, frame, mon, device, gaze_network)
+    data = frame_processor.process_one(id, frame, mon, device, gaze_network)
 
     # Write to CSV
     # disp = np.zeros((mon.h_pixels, mon.w_pixels, 3), dtype=np.uint8) # TODO: Remove once done testing with video
@@ -149,9 +149,9 @@ cap.release()
 csv_file.close()
 
 files_to_delete = [
-    f"{args.id}_gaze_network.pth.tar",
-    f"{args.id}_calib.avi",
-    f"{args.id}_calib_target.pkl"
+    f"{id}_gaze_network.pth.tar",
+    f"{id}_calib.avi",
+    f"{id}_calib_target.pkl"
 ]
 for file_path in files_to_delete:
     if os.path.exists(file_path):
