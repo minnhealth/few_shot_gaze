@@ -70,6 +70,8 @@ class frame_processer:
             if por_available:
                 g_t = targets[frames_read]
             frames_read += 1
+            if (frames_read % 60) == 0:
+                print(f"[INFO] Processed {frames_read} frames")
 
             # detect face
             face_location = face.detect(img,  scale=0.25, use_max='SIZE')

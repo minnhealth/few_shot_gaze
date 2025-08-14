@@ -28,7 +28,9 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Setup device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device_name = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"*** Using {device_name} for processing. ***")
+device = torch.device(device_name)
 
 # Load empty gaze model
 gaze_network = DTED(
