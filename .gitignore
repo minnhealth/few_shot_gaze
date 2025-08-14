@@ -4,3 +4,4 @@ venv
 demo/*.pkl
 demo/*.avi
 calib_data.pkl
+demo/*.pth.tar
